@@ -134,8 +134,8 @@ def index():
     init_db()
 
     # Fetch data from database
-    # cursor.execute('SELECT * FROM market_data')
-    # rows = cursor.fetchall()
+    cursor.execute('SELECT * FROM market_data')
+    rows = cursor.fetchall()
 
     return render_template('index.html', rows=rows)
 
