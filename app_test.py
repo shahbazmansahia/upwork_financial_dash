@@ -3,9 +3,10 @@ import plotly.graph_objs as go
 import pandas as pd  # don't forget to import pandas too!
 from dash import dcc, html, Dash
 from dash.dependencies import Input, Output
+import datetime
 
 # Connect to your SQLite database
-conn = sqlite3.connect('market_data.db')
+conn = sqlite3.connect('market_data.db', check_same_thread=False)
 
 # Define a function to fetch data from the database
 app = Dash(__name__)
@@ -21,7 +22,7 @@ def get_data(ticker):
     return data
 
 
-print(f"data fetched: {get_data('NQ_4H.csv')}")
+# print(f"data fetched: {get_data('NQ_4H.csv')}")
 # Define the layout of your app
 app.layout = html.Div([
     dcc.Dropdown(
@@ -33,15 +34,31 @@ app.layout = html.Div([
     dcc.Graph(id='market-data-graph')
 ])
 
+data_dict = {}
+for ticker in get_data('NQ_4H.csv')['ticker'].unique():
+    data_dict[ticker] = get_data(ticker)
+
 # Define a callback function to update the graph based on the selected ticker
 
 
+# @app.callback(
+#     Output('market-data-graph', 'figure'),
+#     [Input('ticker-dropdown', 'value')]
+# )
+# def update_graph(ticker):
+#     data = get_data(ticker).set_index('datetime')[['close']]
+#     fig = go.Figure(data=[go.Scatter(x=data.index, y=data['close'])])
+#     return fig
 @app.callback(
     Output('market-data-graph', 'figure'),
     [Input('ticker-dropdown', 'value')]
 )
 def update_graph(ticker):
-    data = get_data(ticker).set_index('datetime')[['close']]
+    if ticker not in data_dict:
+        data = get_data(ticker).set_index('datetime')[['close']]
+    else:
+        data = data_dict[ticker].set_index('datetime')[['close']]
+
     fig = go.Figure(data=[go.Scatter(x=data.index, y=data['close'])])
     return fig
 
