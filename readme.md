@@ -12,3 +12,5 @@ After the dependencies and requirements have been installed:
     a. for running the dashboard visualization, run command 'python app_test.py' instead
 
 The app should now open a browser window and start running
+
+<strong>NOTE:</strong> Tested using python 3.10
