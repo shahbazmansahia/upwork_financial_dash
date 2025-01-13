@@ -1,3 +1,6 @@
+# from .'smart-money-concepts_old'.Extend.SHSL import detect_swing_highs_lows
+from SHSL import detect_swing_highs_lows
+import detect_swing_highs_lows
 import sqlite3
 import plotly.graph_objs as go
 import pandas as pd  # don't forget to import pandas too!
@@ -5,7 +8,12 @@ from dash import dcc, html, Dash
 from dash.dependencies import Input, Output
 import datetime
 import time
+import sys
+import os
 
+# for detecting swing highs and lows
+abs_path = os.path.abspath('./smart-money-concepts_old/Extend')
+sys.path.insert(0, abs_path)
 # Connect to your SQLite database
 conn = sqlite3.connect('market_data.db', check_same_thread=False)
 
@@ -60,12 +68,15 @@ def update_graph(ticker):
     else:
         data = data_dict[ticker]
 
-    fig = go.Figure(data=[go.Candlestick(x=data['datetime'],
-                                         open=data['open'],
-                                         close=data['close'],
-                                         high=data['high'],
-                                         low=data['low']
+    data.columns = [str.capitalize(column) for column in data.columns]
+    fig = go.Figure(data=[go.Candlestick(x=data['Datetime'],
+                                         open=data['Open'],
+                                         close=data['Close'],
+                                         high=data['High'],
+                                         low=data['Low']
                                          )])
+    data = detect_swing_highs_lows(data)
+
     return fig
 
 
