@@ -4,6 +4,7 @@ import pandas as pd  # don't forget to import pandas too!
 from dash import dcc, html, Dash
 from dash.dependencies import Input, Output
 import datetime
+import time
 
 # Connect to your SQLite database
 conn = sqlite3.connect('market_data.db', check_same_thread=False)
@@ -55,14 +56,20 @@ for ticker in get_data('NQ_4H.csv')['ticker'].unique():
 )
 def update_graph(ticker):
     if ticker not in data_dict:
-        data = get_data(ticker).set_index('datetime')[['close']]
+        data = get_data(ticker)
     else:
-        data = data_dict[ticker].set_index('datetime')[['close']]
+        data = data_dict[ticker]
 
-    fig = go.Figure(data=[go.Scatter(x=data.index, y=data['close'])])
+    fig = go.Figure(data=[go.Candlestick(x=data['datetime'],
+                                         open=data['open'],
+                                         close=data['close'],
+                                         high=data['high'],
+                                         low=data['low']
+                                         )])
     return fig
 
 
 # run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
+    time.sleep(15)
