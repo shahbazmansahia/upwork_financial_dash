@@ -1,6 +1,5 @@
 # from .'smart-money-concepts_old'.Extend.SHSL import detect_swing_highs_lows
-from SHSL import detect_swing_highs_lows
-import detect_swing_highs_lows
+# from SHSL import detect_swing_highs_lows
 import sqlite3
 import plotly.graph_objs as go
 import pandas as pd  # don't forget to import pandas too!
@@ -14,6 +13,8 @@ import os
 # for detecting swing highs and lows
 abs_path = os.path.abspath('./smart-money-concepts_old/Extend')
 sys.path.insert(0, abs_path)
+from SHSL import detect_swing_highs_lows
+
 # Connect to your SQLite database
 conn = sqlite3.connect('market_data.db', check_same_thread=False)
 
