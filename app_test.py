@@ -9,6 +9,7 @@ import datetime
 import time
 import sys
 import os
+import numpy as np
 
 # for detecting swing highs and lows
 abs_path = os.path.abspath('./smart-money-concepts_old/Extend')
@@ -20,6 +21,8 @@ conn = sqlite3.connect('market_data.db', check_same_thread=False)
 
 # Define a function to fetch data from the database
 app = Dash(__name__)
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
 
 
 def get_data(ticker):
@@ -28,7 +31,8 @@ def get_data(ticker):
     cursor.execute(query, (ticker,))
     rows = cursor.fetchall()
     data = pd.DataFrame(rows)
-    data.columns = ["ticker", "datetime", "open", "high", "low", "close", "volume"]
+    data.columns = ["Ticker", "Datetime", "Open", "High", "Low", "Close", "Volume"]
+    print ("Data Fetched!!!")
     return data
 
 
@@ -38,14 +42,14 @@ app.layout = html.Div([
     dcc.Dropdown(
         id='ticker-dropdown',
         options=[{'label': ticker, 'value': ticker}
-                 for ticker in get_data('NQ_4H.csv')['ticker'].unique()],
-        value=get_data('NQ_4H.csv')['ticker'].unique()[0]
+                 for ticker in get_data('NQ_4H.csv')['Ticker'].unique()],
+        value=get_data('NQ_4H.csv')['Ticker'].unique()[0]
     ),
     dcc.Graph(id='market-data-graph')
 ])
 
 data_dict = {}
-for ticker in get_data('NQ_4H.csv')['ticker'].unique():
+for ticker in get_data('NQ_4H.csv')['Ticker'].unique():
     data_dict[ticker] = get_data(ticker)
 
 # Define a callback function to update the graph based on the selected ticker
@@ -65,23 +69,63 @@ for ticker in get_data('NQ_4H.csv')['ticker'].unique():
 )
 def update_graph(ticker):
     if ticker not in data_dict:
-        data = get_data(ticker)
+        data = detect_swing_highs_lows(get_data(ticker))
     else:
-        data = data_dict[ticker]
+        data = detect_swing_highs_lows(data_dict[ticker])
 
-    data.columns = [str.capitalize(column) for column in data.columns]
+    #data.columns = [str.capitalize(column) for column in data.columns]
     fig = go.Figure(data=[go.Candlestick(x=data['Datetime'],
                                          open=data['Open'],
                                          close=data['Close'],
                                          high=data['High'],
                                          low=data['Low']
                                          )])
-    data = detect_swing_highs_lows(data)
+    #data = detect_swing_highs_lows(data)
 
+    fig.add_scatter(
+    x=data['Datetime'],
+    y=np.where(data['SH'] == 'SH', data['High'] + 0.01, None),
+    mode='markers',
+    text=np.where(data['SH'] == 'SH', 'SH', None),
+    hoverinfo='text'
+    )
+
+    fig.add_scatter(
+        x=data['Datetime'],
+        y=np.where(data['SL'] == 'SL', data['Low'] - 0.01, None),
+        mode='markers',
+        text=np.where(data['SL'] == 'SL', 'SL', None),
+        hoverinfo='text'
+    )
+
+    fig.add_scatter(
+        x=data['Datetime'],
+        y=np.where(data['USH'] == "USH", data['High'] + 0.01, None),
+        mode='markers',
+        text=np.where(data['USH'] == 'USH', 'USH', None),
+        hoverinfo='text'
+    )
+
+    fig.add_scatter(
+        x=data['Datetime'],
+        y=np.where(data['USL'] == 'USL', data['Low'] - 0.01, None),
+        mode='markers',
+        text=np.where(data['USL'] == 'USL', 'USL', None),
+        hoverinfo='text'
+    )
+
+    print ("Graph updated! returning fig...")
+    
+    fig.update_layout(
+        title=f"Market Data for {ticker}",
+        xaxis_title="Date",
+        yaxis_title="Price",
+        xaxis_rangeslider_visible=False
+    )
     return fig
 
 
 # run the app
 if __name__ == '__main__':
-    app.run_server(debug=False)
-    time.sleep(15)
+    app.run_server(debug=True)
+    #time.sleep(15)
