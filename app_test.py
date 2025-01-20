@@ -82,7 +82,7 @@ def update_graph(ticker):
                                          )])
     #data = detect_swing_highs_lows(data)
 
-    fig.add_scatter(
+    fig.add_scattergl(
     x=data['Datetime'],
     y=np.where(data['SH'] == 'SH', data['High'] + 0.01, None),
     mode='markers',
@@ -90,7 +90,7 @@ def update_graph(ticker):
     hoverinfo='text'
     )
 
-    fig.add_scatter(
+    fig.add_scattergl(
         x=data['Datetime'],
         y=np.where(data['SL'] == 'SL', data['Low'] - 0.01, None),
         mode='markers',
@@ -98,7 +98,7 @@ def update_graph(ticker):
         hoverinfo='text'
     )
 
-    fig.add_scatter(
+    fig.add_scattergl(
         x=data['Datetime'],
         y=np.where(data['USH'] == "USH", data['High'] + 0.01, None),
         mode='markers',
@@ -106,7 +106,7 @@ def update_graph(ticker):
         hoverinfo='text'
     )
 
-    fig.add_scatter(
+    fig.add_scattergl(
         x=data['Datetime'],
         y=np.where(data['USL'] == 'USL', data['Low'] - 0.01, None),
         mode='markers',
